@@ -1,0 +1,45 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www/project
+    working_dir: /var/www/project
+    ports:
+      - 8000:80
+    links:
+      - app
+  app:
+    build:
+      context: ./docker/app
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www/project
+      - ./docker/app/php.ini:/usr/local/etc/php/php.ini
+    working_dir: /var/www/project
+    links:
+      - mysql
+  mysql:
+    image: mysql:8
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: dev_db
+      MYSQL_ROOT_PASSWORD: dev-root
+      MYSQL_USER: dev_user
+      MYSQL_PASSWORD: dev-user
+  composer:
+    image: composer
+    volumes:
+      - ./:/app
+      - ./docker/app/php.ini:/usr/local/etc/php/php.ini
+    working_dir: /app
+  php-cli:
+    build:
+      context: ./docker/app
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www/project
+      - ./docker/app/php.ini:/usr/local/etc/php/php.ini
